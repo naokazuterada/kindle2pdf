@@ -10,6 +10,7 @@ https://gemini.google.com/app/2d79c34f2b3802f7?hl=ja
 - `venv/` : Python仮想環境（システムを汚さず実行するための環境）
 - `check_pos.py` : マウスの座標を確認するためのスクリプト
 - `kindle_scan.py` : 自動撮影を実行するメインスクリプト
+- `create_pdf.py` : 撮影した画像をPDFに変換するスクリプト
 - `kindle_screenshots/` : 撮影された画像が保存されるフォルダ（実行時に自動生成）
 
 ## 事前準備（macOS設定）
@@ -66,9 +67,22 @@ deactivate
 
 ## PDF化とNotebookLMへのアップロード
 
+### 方法1: スクリプトを使う（推奨）
+
+```bash
+python create_pdf.py
+```
+
+`kindle_screenshots/` 内の画像をファイル名順に結合して `output.pdf` を出力します。
+
+### 方法2: macOSのクイックアクションを使う
+
 1. `kindle_screenshots/` フォルダを開く
 2. 全ての画像を選択し、右クリック > **クイックアクション** > **PDFを作成** を選択
-3. 出来上がったPDFを [NotebookLM](https://notebooklm.google.com/) にアップロードする
+
+### NotebookLMへのアップロード
+
+出来上がったPDFを [NotebookLM](https://notebooklm.google.com/) にアップロードします。
 
 > NotebookLMが自動で高精度なOCRを行うため、画像PDFのままで問題ありません。
 
