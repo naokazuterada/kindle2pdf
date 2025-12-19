@@ -44,7 +44,7 @@ source venv/bin/activate
 ページめくりをキー入力（矢印キー）ではなく、クリックで行いたい場合に実行します。
 
 ```bash
-python 1_check_pos.py
+python3 1_check_pos.py
 ```
 
 - 実行後、5秒以内にKindleの「ページ送りボタン」の上にマウスを置いて待機
@@ -53,7 +53,7 @@ python 1_check_pos.py
 ### 3. 自動スクショを実行する
 
 ```bash
-python 2_kindle_scan.py
+python3 2_kindle_scan.py
 ```
 
 - 実行後、5秒以内にKindleアプリを最前面に表示し、最初のページを開きます
@@ -72,7 +72,7 @@ deactivate
 ### 方法1: スクリプトを使う（推奨）
 
 ```bash
-python 3_create_pdf.py
+python3 3_create_pdf.py
 ```
 
 `output/screenshots/` 内の画像をファイル名順に結合して `output/book.pdf` を出力します。
