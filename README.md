@@ -8,9 +8,9 @@ https://gemini.google.com/app/2d79c34f2b3802f7?hl=ja
 ## フォルダ構成
 
 - `venv/` : Python仮想環境（システムを汚さず実行するための環境）
-- `check_pos.py` : マウスの座標を確認するためのスクリプト
-- `kindle_scan.py` : 自動撮影を実行するメインスクリプト
-- `create_pdf.py` : 撮影した画像をPDFに変換するスクリプト
+- `1_check_pos.py` : マウスの座標を確認するためのスクリプト
+- `2_kindle_scan.py` : 自動撮影を実行するメインスクリプト
+- `3_create_pdf.py` : 撮影した画像をPDFに変換するスクリプト
 - `kindle_screenshots/` : 撮影された画像が保存されるフォルダ（実行時に自動生成）
 
 ## 事前準備（macOS設定）
@@ -42,7 +42,7 @@ source venv/bin/activate
 ページめくりをキー入力（矢印キー）ではなく、クリックで行いたい場合に実行します。
 
 ```bash
-python check_pos.py
+python 1_check_pos.py
 ```
 
 - 実行後、5秒以内にKindleの「ページ送りボタン」の上にマウスを置いて待機
@@ -51,7 +51,7 @@ python check_pos.py
 ### 3. 自動スクショを実行する
 
 ```bash
-python kindle_scan.py
+python 2_kindle_scan.py
 ```
 
 - 実行後、5秒以内にKindleアプリを最前面に表示し、最初のページを開きます
@@ -70,7 +70,7 @@ deactivate
 ### 方法1: スクリプトを使う（推奨）
 
 ```bash
-python create_pdf.py
+python 3_create_pdf.py
 ```
 
 `kindle_screenshots/` 内の画像をファイル名順に結合して `output.pdf` を出力します。
@@ -90,5 +90,5 @@ python create_pdf.py
 
 | 問題 | 解決方法 |
 |------|----------|
-| ページがめくれない | `kindle_scan.py` の `pyautogui.press('right')` を `pyautogui.click(x, y)` に書き換える |
+| ページがめくれない | `2_kindle_scan.py` の `pyautogui.press('right')` を `pyautogui.click(x, y)` に書き換える |
 | 画像が真っ白になる | KindleのDRM保護により標準のスクショが制限されている可能性あり。`INTERVAL`を長めにするか、フルスクリーンモードを解除する |
