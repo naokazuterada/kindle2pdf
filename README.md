@@ -8,9 +8,9 @@ https://gemini.google.com/app/2d79c34f2b3802f7?hl=ja
 ## フォルダ構成
 
 - `venv/` : Python仮想環境（システムを汚さず実行するための環境）
-- `1_check_pos.py` : マウスの座標を確認するためのスクリプト
-- `2_kindle_scan.py` : 自動撮影を実行するメインスクリプト
-- `3_create_pdf.py` : 撮影した画像をPDFに変換するスクリプト
+- `1_kindle_scan.py` : 自動撮影を実行するメインスクリプト
+- `2_create_pdf.py` : 撮影した画像をPDFに変換するスクリプト
+- `0_check_pos.py` : マウスの座標を確認するためのスクリプト（通常は不要）
 - `output/` : 出力フォルダ（実行時に自動生成）
   - `screenshots/` : 撮影された画像が保存される
   - `book.pdf` : 生成されたPDFファイル
@@ -61,27 +61,16 @@ source venv/bin/activate
 
 > ターミナルの先頭に `(venv)` と表示されれば成功です。
 
-### 2. マウスの座標を確認する
-
-ページめくりをキー入力（矢印キー）ではなく、クリックで行いたい場合に実行します。
+### 2. 自動スクショを実行する
 
 ```bash
-python3 1_check_pos.py
-```
-
-- 実行後、5秒以内にKindleの「ページ送りボタン」の上にマウスを置いて待機
-- 表示された `Point(x=..., y=...)` の数値をメモしてください
-
-### 3. 自動スクショを実行する
-
-```bash
-python3 2_kindle_scan.py
+python3 1_kindle_scan.py
 ```
 
 - 実行後、5秒以内にKindleアプリを最前面に表示し、最初のページを開きます
 - 設定したページ数分、自動で「撮影 → めくり」が繰り返されます
 
-### 4. 仮想環境を終了する
+### 3. 仮想環境を終了する
 
 作業が終わったら、以下のコマンドで環境を抜けます。
 
@@ -94,7 +83,7 @@ deactivate
 ### 方法1: スクリプトを使う（推奨）
 
 ```bash
-python3 3_create_pdf.py
+python3 2_create_pdf.py
 ```
 
 `output/screenshots/` 内の画像をファイル名順に結合して `output/book.pdf` を出力します。
@@ -114,5 +103,5 @@ python3 3_create_pdf.py
 
 | 問題 | 解決方法 |
 |------|----------|
-| ページがめくれない | `2_kindle_scan.py` の `pyautogui.press('right')` を `pyautogui.click(x, y)` に書き換える |
+| ページがめくれない | `1_kindle_scan.py` の `pyautogui.press('left')` を `pyautogui.click(x, y)` に書き換える（座標は `python3 0_check_pos.py` で確認） |
 | 画像が真っ白になる | KindleのDRM保護により標準のスクショが制限されている可能性あり。`INTERVAL`を長めにするか、フルスクリーンモードを解除する |
