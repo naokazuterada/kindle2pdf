@@ -3,8 +3,8 @@ import os
 import glob
 
 # --- 設定項目 ---
-SAVE_DIR = "kindle_screenshots"  # 画像が保存されているフォルダ
-OUTPUT_PDF = "output.pdf"        # 出力するPDFファイル名
+SAVE_DIR = "output/screenshots"  # 画像が保存されているフォルダ
+OUTPUT_PDF = "output/book.pdf"   # 出力するPDFファイル名
 # ----------------
 
 # 画像ファイルを取得してソート

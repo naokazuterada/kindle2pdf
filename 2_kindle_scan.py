@@ -3,7 +3,7 @@ import time
 import os
 
 # --- 設定項目 ---
-SAVE_DIR = "kindle_screenshots"  # 保存フォルダ名
+SAVE_DIR = "output/screenshots"  # 保存フォルダ名
 TOTAL_PAGES = 100                # 取りたいページ数
 INTERVAL = 1                   # ページめくりの待機時間（通信環境に合わせて調整）
 NEXT_PAGE_KEY = 'left'          # キーボードの右矢印でめくる場合

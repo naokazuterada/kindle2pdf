@@ -11,7 +11,9 @@ https://gemini.google.com/app/2d79c34f2b3802f7?hl=ja
 - `1_check_pos.py` : マウスの座標を確認するためのスクリプト
 - `2_kindle_scan.py` : 自動撮影を実行するメインスクリプト
 - `3_create_pdf.py` : 撮影した画像をPDFに変換するスクリプト
-- `kindle_screenshots/` : 撮影された画像が保存されるフォルダ（実行時に自動生成）
+- `output/` : 出力フォルダ（実行時に自動生成）
+  - `screenshots/` : 撮影された画像が保存される
+  - `book.pdf` : 生成されたPDFファイル
 
 ## 事前準備（macOS設定）
 
@@ -73,11 +75,11 @@ deactivate
 python 3_create_pdf.py
 ```
 
-`kindle_screenshots/` 内の画像をファイル名順に結合して `output.pdf` を出力します。
+`output/screenshots/` 内の画像をファイル名順に結合して `output/book.pdf` を出力します。
 
 ### 方法2: macOSのクイックアクションを使う
 
-1. `kindle_screenshots/` フォルダを開く
+1. `output/screenshots/` フォルダを開く
 2. 全ての画像を選択し、右クリック > **クイックアクション** > **PDFを作成** を選択
 
 ### NotebookLMへのアップロード

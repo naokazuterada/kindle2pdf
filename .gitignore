@@ -1,3 +1,6 @@
+output/
+.claude/
+
+# 旧ディレクトリ構成（互換性のため）
 kindle_screenshots/
 output.pdf
-.claude/
