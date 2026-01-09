@@ -10,15 +10,16 @@ SAVE_DIR = "output/screenshots"  # 保存フォルダ名
 MAX_PAGES = 1000                 # 最大ページ数（安全のための上限）
 INTERVAL = 1                     # ページめくりの待機時間（通信環境に合わせて調整）
 DUPLICATE_THRESHOLD = 3          # 同じ画面が何回続いたら停止するか
-TOOLBAR_HEIGHT_RETINA = 104      # 削除するメニューバーの高さ（Retinaディスプレイ用）
 # ----------------
 
-def get_display_scale():
-    """ディスプレイのスケールファクターを取得（Retinaなら2、通常なら1）"""
-    screen_width, _ = pyautogui.size()  # 論理解像度
-    screenshot = pyautogui.screenshot()
-    actual_width = screenshot.size[0]   # 実際のピクセル数
-    return actual_width // screen_width
+def toggle_fullscreen():
+    """フルスクリーンをトグルする（macOS: Control+Command+F）"""
+    pyautogui.keyDown('ctrl')
+    pyautogui.keyDown('command')
+    pyautogui.press('f')
+    pyautogui.keyUp('command')
+    pyautogui.keyUp('ctrl')
+    time.sleep(1)  # フルスクリーン切り替えアニメーションを待つ
 
 def read_arrow_key():
     """矢印キーを読み取る（左右のみ対応）"""
@@ -51,30 +52,49 @@ def select_page_direction():
             print(f"  → {direction} を選択しました")
             return direction
 
-def select_crop_toolbar():
-    """ツールバー削除オプションを選択（デフォルトは削除する）"""
-    print("画面上部のツールバーを削除しますか？")
-    choice = input("  [Y]/n (Enterで削除): ").strip().lower()
-    return choice != 'n'
-
-DISPLAY_SCALE = get_display_scale()
-TOOLBAR_HEIGHT = TOOLBAR_HEIGHT_RETINA if DISPLAY_SCALE >= 2 else TOOLBAR_HEIGHT_RETINA // 2
-
 NEXT_PAGE_KEY = select_page_direction()
-CROP_TOOLBAR = select_crop_toolbar()
 
 def get_pixel_data_for_comparison(image):
-    """比較用のピクセルデータを取得（メニューバーの時刻変化を除外するため上部をクロップ）"""
+    """比較用のピクセルデータを取得"""
+    return image.tobytes()
+
+def remove_black_bar(image):
+    """画像上部の黒い帯を自動検出して削除"""
     width, height = image.size
-    # 上部50ピクセルを除外（メニューバーの時刻が変わっても影響しないように）
-    cropped = image.crop((0, 50, width, height))
-    return cropped.tobytes()
+    pixels = image.load()
+
+    # 上部から黒い行を検出
+    black_threshold = 30  # この値以下のRGB値を黒とみなす
+    black_row_end = 0
+
+    for y in range(height):
+        # 行の左端から一定範囲のピクセルをチェック（全幅チェックは重いので）
+        is_black_row = True
+        check_points = [int(width * 0.1), int(width * 0.3), int(width * 0.5)]
+        for x in check_points:
+            r, g, b = pixels[x, y][:3]
+            if r > black_threshold or g > black_threshold or b > black_threshold:
+                is_black_row = False
+                break
+
+        if is_black_row:
+            black_row_end = y + 1
+        else:
+            break
+
+    # 黒い帯があれば削除
+    if black_row_end > 0:
+        return image.crop((0, black_row_end, width, height))
+    return image
 
 if not os.path.exists(SAVE_DIR):
     os.makedirs(SAVE_DIR)
 
-print("5秒後に開始します。Kindleを最前面に表示してください。")
-time.sleep(5)
+print("3秒後にKindleをフルスクリーンにして開始します。Kindleを最前面に表示してください。")
+time.sleep(3)
+
+# フルスクリーンに切り替え
+toggle_fullscreen()
 
 last_pixel_data = None
 duplicate_count = 0
@@ -96,11 +116,8 @@ for i in range(MAX_PAGES):
         print(f"{file_name} は前回と同じ画像です（{duplicate_count}/{DUPLICATE_THRESHOLD}）")
 
         # 重複画像も一旦保存（後で削除するためリストに追加）
-        image_to_save = screenshot
-        if CROP_TOOLBAR:
-            width, height = screenshot.size
-            image_to_save = screenshot.crop((0, TOOLBAR_HEIGHT, width, height))
-        image_to_save.save(file_path)
+        cropped = remove_black_bar(screenshot)
+        cropped.save(file_path)
         duplicates_to_remove.append(file_path)
 
         if duplicate_count >= DUPLICATE_THRESHOLD:
@@ -110,11 +127,8 @@ for i in range(MAX_PAGES):
         # 新しい画像の場合
         duplicate_count = 0
         duplicates_to_remove = []  # 重複リストをリセット
-        image_to_save = screenshot
-        if CROP_TOOLBAR:
-            width, height = screenshot.size
-            image_to_save = screenshot.crop((0, TOOLBAR_HEIGHT, width, height))
-        image_to_save.save(file_path)
+        cropped = remove_black_bar(screenshot)
+        cropped.save(file_path)
         saved_count += 1
         print(f"{file_name} を保存しました（{saved_count}ページ目）")
 
@@ -123,6 +137,9 @@ for i in range(MAX_PAGES):
     # ページをめくる（キー入力 または click(x, y)）
     pyautogui.press(NEXT_PAGE_KEY)
     time.sleep(INTERVAL)
+
+# フルスクリーンを解除
+toggle_fullscreen()
 
 # 重複した画像を削除（最初の1枚は残す）
 for dup_path in duplicates_to_remove:
