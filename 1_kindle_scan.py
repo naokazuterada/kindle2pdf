@@ -7,9 +7,25 @@ from io import BytesIO
 SAVE_DIR = "output/screenshots"  # 保存フォルダ名
 MAX_PAGES = 1000                 # 最大ページ数（安全のための上限）
 INTERVAL = 1                     # ページめくりの待機時間（通信環境に合わせて調整）
-NEXT_PAGE_KEY = 'left'           # キーボードの左矢印でめくる場合
 DUPLICATE_THRESHOLD = 5          # 同じ画面が何回続いたら停止するか
 # ----------------
+
+def select_page_direction():
+    """ページ送り方向を選択"""
+    print("ページ送り方向を選択してください:")
+    print("  1: 左方向 (← キー) - 日本語の縦書き・マンガなど")
+    print("  2: 右方向 (→ キー) - 横書きの本など")
+
+    while True:
+        choice = input("選択 [1/2]: ").strip()
+        if choice == '1':
+            return 'left'
+        elif choice == '2':
+            return 'right'
+        else:
+            print("1 または 2 を入力してください。")
+
+NEXT_PAGE_KEY = select_page_direction()
 
 def get_image_bytes(image):
     """画像をバイト列に変換して比較用に返す"""
