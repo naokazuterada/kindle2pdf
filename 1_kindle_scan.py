@@ -1,13 +1,12 @@
 import pyautogui
 import time
 import os
-from io import BytesIO
 
 # --- 設定項目 ---
 SAVE_DIR = "output/screenshots"  # 保存フォルダ名
 MAX_PAGES = 1000                 # 最大ページ数（安全のための上限）
 INTERVAL = 1                     # ページめくりの待機時間（通信環境に合わせて調整）
-DUPLICATE_THRESHOLD = 5          # 同じ画面が何回続いたら停止するか
+DUPLICATE_THRESHOLD = 3          # 同じ画面が何回続いたら停止するか
 # ----------------
 
 def select_page_direction():
@@ -27,11 +26,12 @@ def select_page_direction():
 
 NEXT_PAGE_KEY = select_page_direction()
 
-def get_image_bytes(image):
-    """画像をバイト列に変換して比較用に返す"""
-    buffer = BytesIO()
-    image.save(buffer, format='PNG')
-    return buffer.getvalue()
+def get_pixel_data_for_comparison(image):
+    """比較用のピクセルデータを取得（メニューバーの時刻変化を除外するため上部をクロップ）"""
+    width, height = image.size
+    # 上部50ピクセルを除外（メニューバーの時刻が変わっても影響しないように）
+    cropped = image.crop((0, 50, width, height))
+    return cropped.tobytes()
 
 if not os.path.exists(SAVE_DIR):
     os.makedirs(SAVE_DIR)
@@ -39,7 +39,7 @@ if not os.path.exists(SAVE_DIR):
 print("5秒後に開始します。Kindleを最前面に表示してください。")
 time.sleep(5)
 
-last_image_bytes = None
+last_pixel_data = None
 duplicate_count = 0
 saved_count = 0
 duplicates_to_remove = []
@@ -47,14 +47,14 @@ duplicates_to_remove = []
 for i in range(MAX_PAGES):
     # スクリーンショットを撮る
     screenshot = pyautogui.screenshot()
-    current_image_bytes = get_image_bytes(screenshot)
+    current_pixel_data = get_pixel_data_for_comparison(screenshot)
 
     # ファイル名を 001.png のような形式にする
     file_name = f"{i+1:03d}.png"
     file_path = os.path.join(SAVE_DIR, file_name)
 
-    # 前回と同じ画像かチェック
-    if last_image_bytes == current_image_bytes:
+    # 前回と同じ画像かチェック（ピクセルデータで比較）
+    if last_pixel_data == current_pixel_data:
         duplicate_count += 1
         print(f"{file_name} は前回と同じ画像です（{duplicate_count}/{DUPLICATE_THRESHOLD}）")
 
@@ -73,7 +73,7 @@ for i in range(MAX_PAGES):
         saved_count += 1
         print(f"{file_name} を保存しました（{saved_count}ページ目）")
 
-    last_image_bytes = current_image_bytes
+    last_pixel_data = current_pixel_data
 
     # ページをめくる（キー入力 または click(x, y)）
     pyautogui.press(NEXT_PAGE_KEY)
