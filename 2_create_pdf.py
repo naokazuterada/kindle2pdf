@@ -149,11 +149,24 @@ def create_pdf_from_images(save_dir, output_pdf):
 if __name__ == "__main__":
     # コマンドライン引数でPDFパスが指定された場合は分割のみ実行
     if len(sys.argv) > 1:
-        pdf_path = sys.argv[1]
-        if not os.path.exists(pdf_path):
-            print(f"エラー: {pdf_path} が見つかりません")
-            exit(1)
-        split_pdf(pdf_path)
+        # 複数のPDFファイルを処理
+        pdf_paths = sys.argv[1:]
+        total_files = len(pdf_paths)
+
+        for index, pdf_path in enumerate(pdf_paths, 1):
+            print(f"\n{'='*60}")
+            print(f"[{index}/{total_files}] 処理中: {pdf_path}")
+            print(f"{'='*60}")
+
+            if not os.path.exists(pdf_path):
+                print(f"エラー: {pdf_path} が見つかりません（スキップします）")
+                continue
+
+            split_pdf(pdf_path)
+
+        print(f"\n{'='*60}")
+        print(f"完了: {total_files} 個のファイルを処理しました")
+        print(f"{'='*60}")
     else:
         # 画像からPDFを作成
         pdf_path = create_pdf_from_images(SAVE_DIR, OUTPUT_PDF)

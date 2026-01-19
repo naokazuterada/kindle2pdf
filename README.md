@@ -102,11 +102,17 @@ python3 2_create_pdf.py
 
 すでにPDFがあって、それを分割したい場合:
 
+**単一ファイルの場合:**
 ```bash
 python3 2_create_pdf.py path/to/your.pdf
 ```
 
-これで指定したPDFファイルを32MB以下に分割できます。
+**複数ファイルを一括処理する場合:**
+```bash
+python3 2_create_pdf.py file1.pdf file2.pdf file3.pdf
+```
+
+これで指定したPDFファイルを32MB以下に分割できます。複数指定した場合は順番に処理されます。
 
 ### NotebookLMへのアップロード
 
