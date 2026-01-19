@@ -9,11 +9,14 @@ https://gemini.google.com/app/2d79c34f2b3802f7?hl=ja
 
 - `venv/` : Python仮想環境（システムを汚さず実行するための環境）
 - `1_kindle_scan.py` : 自動撮影を実行するメインスクリプト
-- `2_create_pdf.py` : 撮影した画像をPDFに変換するスクリプト
+- `2_create_pdf.py` : 画像をPDFに変換し、必要に応じて32MB以下に分割するスクリプト
 - `0_check_pos.py` : マウスの座標を確認するためのスクリプト（通常は不要）
 - `output/` : 出力フォルダ（実行時に自動生成）
   - `screenshots/` : 撮影された画像が保存される
-  - `book.pdf` : 生成されたPDFファイル
+  - `books/` : PDFファイルの保存先
+    - `book.pdf` : 生成されたPDFファイル
+    - `book/` : 分割されたPDFファイル（32MB超の場合に自動生成）
+      - `0001.pdf`, `0002.pdf`, ... : 分割後のPDFファイル
 
 ## 事前準備（macOS設定）
 
@@ -49,7 +52,7 @@ source venv/bin/activate
 ### 3. 必要なパッケージをインストールする
 
 ```bash
-pip install pyautogui Pillow
+pip install pyautogui Pillow pypdf
 ```
 
 ## 使い方（手順）
@@ -83,22 +86,34 @@ deactivate
 
 ## PDF化とNotebookLMへのアップロード
 
-### 方法1: スクリプトを使う（推奨）
+### PDFを作成する
 
 ```bash
 python3 2_create_pdf.py
 ```
 
-`output/screenshots/` 内の画像をファイル名順に結合して `output/book.pdf` を出力します。
+**処理内容:**
+1. `output/screenshots/` 内の画像をファイル名順に結合して `output/books/book.pdf` を作成
+2. ファイルサイズが32MBを超える場合、自動的に分割します
+   - 分割ファイルは `output/books/book/0001.pdf`, `0002.pdf`, ... に保存されます
+3. 32MB以下の場合は分割せず、そのまま完了します
 
-### 方法2: macOSのクイックアクションを使う
+### 既存のPDFを分割する
 
-1. `output/screenshots/` フォルダを開く
-2. 全ての画像を選択し、右クリック > **クイックアクション** > **PDFを作成** を選択
+すでにPDFがあって、それを分割したい場合:
+
+```bash
+python3 2_create_pdf.py path/to/your.pdf
+```
+
+これで指定したPDFファイルを32MB以下に分割できます。
 
 ### NotebookLMへのアップロード
 
 出来上がったPDFを [NotebookLM](https://notebooklm.google.com/) にアップロードします。
+
+- **分割されなかった場合**: `output/books/book.pdf` をそのままアップロード
+- **分割された場合**: `output/books/book/` フォルダ内の `0001.pdf`, `0002.pdf`, ... を順番にアップロード
 
 > NotebookLMが自動で高精度なOCRを行うため、画像PDFのままで問題ありません。
 
