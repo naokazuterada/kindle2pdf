@@ -16,7 +16,7 @@ https://gemini.google.com/app/2d79c34f2b3802f7?hl=ja
   - `books/` : PDFファイルの保存先
     - `book.pdf` : 生成されたPDFファイル
     - `book/` : 分割されたPDFファイル（32MB超の場合に自動生成）
-      - `0001.pdf`, `0002.pdf`, ... : 分割後のPDFファイル
+      - `001.pdf`, `002.pdf`, ... : 分割後のPDFファイル
 
 ## 事前準備（macOS設定）
 
@@ -95,7 +95,7 @@ python3 2_create_pdf.py
 **処理内容:**
 1. `output/screenshots/` 内の画像をファイル名順に結合して `output/books/book.pdf` を作成
 2. ファイルサイズが32MBを超える場合、自動的に分割します
-   - 分割ファイルは `output/books/book/0001.pdf`, `0002.pdf`, ... に保存されます
+   - 分割ファイルは `output/books/book/001.pdf`, `002.pdf`, ... に保存されます
 3. 32MB以下の場合は分割せず、そのまま完了します
 
 ### 既存のPDFを分割する
@@ -119,7 +119,7 @@ python3 2_create_pdf.py file1.pdf file2.pdf file3.pdf
 出来上がったPDFを [NotebookLM](https://notebooklm.google.com/) にアップロードします。
 
 - **分割されなかった場合**: `output/books/book.pdf` をそのままアップロード
-- **分割された場合**: `output/books/book/` フォルダ内の `0001.pdf`, `0002.pdf`, ... を順番にアップロード
+- **分割された場合**: `output/books/book/` フォルダ内の `001.pdf`, `002.pdf`, ... を順番にアップロード
 
 > NotebookLMが自動で高精度なOCRを行うため、画像PDFのままで問題ありません。
 

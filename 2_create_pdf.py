@@ -92,7 +92,7 @@ def split_pdf(input_pdf_path):
                 break
 
         # 最終的なファイル名で保存
-        output_filename = f"{file_number:04d}.pdf"
+        output_filename = f"{file_number:03d}.pdf"
         output_path = os.path.join(output_dir, output_filename)
 
         with open(output_path, "wb") as output_file:
