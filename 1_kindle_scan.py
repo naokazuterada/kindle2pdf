@@ -52,6 +52,36 @@ def select_page_direction():
             print(f"  → {direction} を選択しました")
             return direction
 
+def check_existing_images():
+    """outputディレクトリに既存の画像があるかチェックし、対応を確認"""
+    if not os.path.exists(SAVE_DIR):
+        return True  # ディレクトリがなければ続行
+
+    existing_images = [f for f in os.listdir(SAVE_DIR) if f.endswith('.png')]
+    if not existing_images:
+        return True  # 画像がなければ続行
+
+    print(f"\n⚠️  {SAVE_DIR} に既存の画像が {len(existing_images)} 件あります。")
+    print("  1: 削除して続行")
+    print("  2: キャンセル")
+
+    while True:
+        choice = input("選択してください (1/2): ").strip()
+        if choice == '1':
+            for img in existing_images:
+                os.remove(os.path.join(SAVE_DIR, img))
+            print(f"  → {len(existing_images)} 件の画像を削除しました。\n")
+            return True
+        elif choice == '2':
+            print("  → キャンセルしました。")
+            return False
+        else:
+            print("  1 または 2 を入力してください。")
+
+# 既存画像のチェック
+if not check_existing_images():
+    sys.exit(0)
+
 NEXT_PAGE_KEY = select_page_direction()
 
 def get_pixel_data_for_comparison(image):
