@@ -2,6 +2,7 @@ from PIL import Image
 from pypdf import PdfReader, PdfWriter
 import os
 import glob
+import re
 import sys
 
 # --- 設定項目 ---
@@ -111,6 +112,42 @@ def split_pdf(input_pdf_path):
     print(f"\n完了: {file_number - 1} 個のPDFファイルに分割しました")
     print(f"出力先: {output_dir}")
 
+def natural_sort_key(path):
+    """ファイル名の数字部分を数値として比較するためのキー"""
+    name = os.path.basename(path)
+    return [int(part) if part.isdigit() else part.lower()
+            for part in re.split(r"(\d+)", name)]
+
+def report_missing_numbers(image_files):
+    """ファイル名の番号に欠番がある場合に通知する（処理は止めない）"""
+    numbers = []
+    for path in image_files:
+        digits = re.findall(r"\d+", os.path.basename(path))
+        if digits:
+            numbers.append(int(digits[-1]))
+
+    if len(numbers) < 2:
+        return
+
+    missing = sorted(set(range(min(numbers), max(numbers) + 1)) - set(numbers))
+    if missing:
+        preview = ", ".join(str(n) for n in missing[:20])
+        if len(missing) > 20:
+            preview += f", ... 他 {len(missing) - 20} 件"
+        print(f"欠番あり（削除済みページと思われます / {len(missing)} 件）: {preview}")
+        print("→ 欠番は飛ばして、残りの画像をすべて結合します")
+
+def iter_images(image_files, skipped):
+    """画像を1枚ずつ開いて返す（読み込めないファイルは飛ばす）"""
+    for index, path in enumerate(image_files, 1):
+        try:
+            with Image.open(path) as img:
+                yield img.convert("RGB")
+        except Exception as e:
+            skipped.append((path, e))
+            print(f"警告: {os.path.basename(path)} を読み込めませんでした（スキップ）: {e}")
+            continue
+
 def create_pdf_from_images(save_dir, output_pdf):
     """画像からPDFを作成"""
     # 出力先フォルダを作成（存在しない場合）
@@ -118,32 +155,48 @@ def create_pdf_from_images(save_dir, output_pdf):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    # 画像ファイルを取得してソート
-    image_files = sorted(glob.glob(os.path.join(save_dir, "*.png")))
+    # 画像ファイルを取得してソート（番号順・欠番があってもそのまま続行）
+    image_files = sorted(glob.glob(os.path.join(save_dir, "*.png")),
+                         key=natural_sort_key)
 
     if not image_files:
         print(f"エラー: {save_dir} フォルダに画像がありません")
         exit(1)
 
     print(f"{len(image_files)} 枚の画像を見つけました")
+    report_missing_numbers(image_files)
 
-    # 最初の画像を開く
-    first_image = Image.open(image_files[0]).convert("RGB")
+    # 先頭の使える画像を探す（壊れているファイルは飛ばす）
+    skipped = []
+    first_image = None
+    first_index = 0
+    for index, path in enumerate(image_files):
+        try:
+            with Image.open(path) as img:
+                first_image = img.convert("RGB")
+            first_index = index
+            break
+        except Exception as e:
+            skipped.append((path, e))
+            print(f"警告: {os.path.basename(path)} を読み込めませんでした（スキップ）: {e}")
 
-    # 残りの画像を開く
-    other_images = []
-    for f in image_files[1:]:
-        img = Image.open(f).convert("RGB")
-        other_images.append(img)
+    if first_image is None:
+        print("エラー: 読み込める画像が1枚もありませんでした")
+        exit(1)
 
-    # PDFとして保存
+    # PDFとして保存（メモリ節約のため1枚ずつ開いて渡す）
     first_image.save(
         output_pdf,
         save_all=True,
-        append_images=other_images
+        append_images=iter_images(image_files[first_index + 1:], skipped)
     )
 
-    print(f"完了: {output_pdf} を作成しました")
+    used_count = len(image_files) - len(skipped)
+    print(f"完了: {output_pdf} を作成しました（{used_count} ページ）")
+    if skipped:
+        print(f"読み込めずスキップした画像: {len(skipped)} 件")
+        for path, e in skipped:
+            print(f"  - {os.path.basename(path)}: {e}")
     return output_pdf
 
 if __name__ == "__main__":
